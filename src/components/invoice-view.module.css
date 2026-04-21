@@ -226,11 +226,6 @@
 }
 
 @media print {
-  @page {
-    size: A4;
-    margin: 8mm;
-  }
-
   .page {
     width: 100%;
     margin: 0;
