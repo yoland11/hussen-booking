@@ -1,26 +1,95 @@
-@import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #071325;
+  --bg-alt: #0d1b33;
+  --panel: rgba(8, 20, 40, 0.78);
+  --panel-soft: rgba(255, 255, 255, 0.06);
+  --line: rgba(229, 193, 124, 0.12);
+  --text: #f8f1e7;
+  --muted: rgba(243, 232, 216, 0.72);
+  --gold: #d8b56d;
+  --gold-soft: #f3d7a4;
+  --orange: #ff7a2d;
+  --red: #9d2d32;
+  --green: #1f8e64;
+  --page-shadow: 0 22px 50px rgba(2, 8, 23, 0.45);
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(255, 132, 49, 0.18), transparent 28%),
+    radial-gradient(circle at top left, rgba(215, 181, 108, 0.1), transparent 26%),
+    linear-gradient(180deg, #071325, #09172d 34%, #081122);
+  color: var(--text);
+  font-family: var(--font-cairo), sans-serif;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.24;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::before {
+  top: -120px;
+  right: -100px;
+  background: rgba(255, 121, 45, 0.5);
+}
+
+body::after {
+  bottom: -140px;
+  left: -120px;
+  background: rgba(157, 45, 50, 0.42);
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-marhey), var(--font-cairo), sans-serif;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(239, 228, 210, 0.44);
+}
+
+::selection {
+  background: rgba(255, 140, 72, 0.34);
+  color: #fff7ed;
 }

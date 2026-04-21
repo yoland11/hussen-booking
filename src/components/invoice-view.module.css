@@ -1,0 +1,282 @@
+.page {
+  width: min(920px, calc(100% - 1.2rem));
+  margin: 0 auto;
+  padding: 1rem 0 1.8rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.toolbarButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.8rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(230, 192, 120, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff2e1;
+  text-decoration: none;
+  font: inherit;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.toolbarButton:hover {
+  transform: translateY(-1px);
+}
+
+.toolbarHint {
+  margin: 0;
+  color: rgba(244, 233, 216, 0.72);
+}
+
+.invoice {
+  padding: 1.1rem;
+  border-radius: 26px;
+  border: 1px solid rgba(231, 196, 122, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 250, 244, 0.93)),
+    radial-gradient(circle at top right, rgba(255, 148, 70, 0.12), transparent 30%);
+  color: #1d1a18;
+  box-shadow: 0 20px 44px rgba(4, 12, 32, 0.22);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(250px, 0.85fr);
+  gap: 0.9rem;
+  align-items: start;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(190, 149, 80, 0.2);
+}
+
+.logoCluster {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.logoCoin {
+  width: 168px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(11, 30, 58, 0.08), rgba(215, 176, 95, 0.14));
+  padding: 0.55rem 0.8rem;
+}
+
+.heroCopy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.heroCopy h1 {
+  margin: 0;
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
+
+.heroCopy p {
+  margin: 0;
+  color: #5f4a33;
+  font-size: 0.95rem;
+}
+
+.invoiceMeta {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.invoiceMeta div {
+  padding: 0.65rem 0.8rem;
+  border-radius: 14px;
+  background: rgba(11, 30, 58, 0.06);
+}
+
+.invoiceMeta span {
+  display: block;
+  color: #7b6241;
+  font-size: 0.78rem;
+}
+
+.invoiceMeta strong {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.96rem;
+}
+
+.compactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+}
+
+.card,
+.wideCard {
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(198, 160, 95, 0.18);
+  break-inside: avoid;
+}
+
+.card h2,
+.wideCard h2 {
+  margin: 0 0 0.6rem;
+  color: #1d1a18;
+  font-size: 1rem;
+}
+
+.detailList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.detailList li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px dashed rgba(168, 135, 79, 0.18);
+}
+
+.detailList li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.detailList li span {
+  color: #7f6544;
+  font-size: 0.88rem;
+}
+
+.detailList li strong {
+  text-align: left;
+  font-size: 0.94rem;
+}
+
+.compactSection {
+  margin-top: 0.75rem;
+}
+
+.wideCard p {
+  margin: 0;
+  line-height: 1.75;
+  color: #43392d;
+  font-size: 0.92rem;
+}
+
+.financialGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.financialGrid div {
+  padding: 0.75rem;
+  border-radius: 16px;
+  background: rgba(11, 30, 58, 0.05);
+}
+
+.financialGrid span {
+  display: block;
+  color: #7b6241;
+  font-size: 0.78rem;
+}
+
+.financialGrid strong {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 860px) {
+  .hero,
+  .compactGrid,
+  .financialGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero,
+  .logoCluster {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+
+  .page {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toolbar {
+    display: none;
+  }
+
+  .invoice {
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .hero {
+    gap: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .compactGrid {
+    gap: 0.5rem;
+    margin-top: 0.55rem;
+  }
+
+  .card,
+  .wideCard {
+    padding: 0.65rem;
+    border-radius: 14px;
+  }
+
+  .compactSection {
+    margin-top: 0.5rem;
+  }
+
+  .wideCard p,
+  .detailList li strong,
+  .financialGrid strong {
+    font-size: 0.86rem;
+  }
+
+  .detailList li,
+  .financialGrid div,
+  .invoiceMeta div {
+    break-inside: avoid;
+  }
+}
