@@ -4,12 +4,7 @@ import { CopyrightFooter } from "@/components/copyright-footer";
 import { InvoicePrintShell } from "@/components/invoice-print-shell";
 import { InvoiceToolbar } from "@/components/invoice-toolbar";
 import { BRAND_NAME } from "@/lib/constants";
-import {
-  createInvoiceNumber,
-  formatCurrency,
-  formatDate,
-  formatDateTime,
-} from "@/lib/format";
+import { formatCurrency, formatDate } from "@/lib/format";
 import type { Booking } from "@/types/booking";
 
 import styles from "./invoice-view.module.css";
@@ -43,21 +38,6 @@ export function InvoiceView({ booking, autoPrint = false }: InvoiceViewProps) {
                 <p>فاتورة حجز جلسة تصوير</p>
               </div>
             </div>
-
-            <div className={styles.invoiceMeta}>
-              <div>
-                <span>رقم الفاتورة</span>
-                <strong>{createInvoiceNumber(booking)}</strong>
-              </div>
-              <div>
-                <span>تاريخ الإصدار</span>
-                <strong>{formatDateTime(booking.updated_at)}</strong>
-              </div>
-              <div>
-                <span>تاريخ الحجز</span>
-                <strong>{formatDate(booking.booking_date)}</strong>
-              </div>
-            </div>
           </div>
 
           <div className={styles.compactGrid}>
@@ -73,8 +53,8 @@ export function InvoiceView({ booking, autoPrint = false }: InvoiceViewProps) {
                   <strong dir="ltr">{booking.phone}</strong>
                 </li>
                 <li>
-                  <span>آخر تحديث</span>
-                  <strong>{formatDateTime(booking.updated_at)}</strong>
+                  <span>تاريخ الحجز</span>
+                  <strong>{formatDate(booking.booking_date)}</strong>
                 </li>
               </ul>
             </article>
@@ -99,6 +79,25 @@ export function InvoiceView({ booking, autoPrint = false }: InvoiceViewProps) {
                   <strong>{booking.staff_gender}</strong>
                 </li>
               </ul>
+
+              <div className={styles.inlineFinance}>
+                <div>
+                  <span>إجمالي الحساب</span>
+                  <strong>{formatCurrency(booking.total_amount)}</strong>
+                </div>
+                <div>
+                  <span>الواصل</span>
+                  <strong>{formatCurrency(booking.paid_amount)}</strong>
+                </div>
+                <div>
+                  <span>المتبقي</span>
+                  <strong>{formatCurrency(booking.remaining_amount)}</strong>
+                </div>
+                <div>
+                  <span>حالة الدفع</span>
+                  <strong>{booking.payment_status}</strong>
+                </div>
+              </div>
             </article>
           </div>
 
@@ -108,28 +107,6 @@ export function InvoiceView({ booking, autoPrint = false }: InvoiceViewProps) {
               <p>{booking.extra_details}</p>
             </article>
           ) : null}
-
-          <article className={`${styles.wideCard} ${styles.compactSection}`}>
-            <h2>ملخص الحساب</h2>
-            <div className={styles.financialGrid}>
-              <div>
-                <span>إجمالي الحساب</span>
-                <strong>{formatCurrency(booking.total_amount)}</strong>
-              </div>
-              <div>
-                <span>المبلغ الواصل</span>
-                <strong>{formatCurrency(booking.paid_amount)}</strong>
-              </div>
-              <div>
-                <span>المتبقي</span>
-                <strong>{formatCurrency(booking.remaining_amount)}</strong>
-              </div>
-              <div>
-                <span>حالة الدفع</span>
-                <strong>{booking.payment_status}</strong>
-              </div>
-            </div>
-          </article>
 
           {booking.notes ? (
             <article className={`${styles.wideCard} ${styles.compactSection}`}>

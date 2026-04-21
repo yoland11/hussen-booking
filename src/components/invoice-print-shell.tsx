@@ -9,7 +9,7 @@ type InvoicePrintShellProps = {
   children: ReactNode;
 };
 
-const PRINTABLE_HEIGHT_PX = 1060;
+const PRINTABLE_HEIGHT_PX = 980;
 
 export function InvoicePrintShell({ children }: InvoicePrintShellProps) {
   const contentRef = useRef<HTMLDivElement>(null);
