@@ -23,9 +23,16 @@ function normalizeBooking(row: BookingRow): Booking {
 }
 
 function serializePayload(payload: BookingPayload) {
+  const hasPaymentData =
+    payload.total_amount > 0 ||
+    payload.paid_amount > 0 ||
+    payload.payment_status !== null;
+
   return {
     ...payload,
-    payment_status: resolvePaymentStatus(payload.total_amount, payload.paid_amount),
+    payment_status: hasPaymentData
+      ? resolvePaymentStatus(payload.total_amount, payload.paid_amount)
+      : null,
   };
 }
 

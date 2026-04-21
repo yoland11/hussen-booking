@@ -29,6 +29,15 @@ export function calculateRemaining(total: number, paid: number) {
   return Math.max(total - paid, 0);
 }
 
+export function formatOptionalText(value: string | null | undefined, fallback = "غير محدد") {
+  if (!value) {
+    return fallback;
+  }
+
+  const trimmed = value.trim();
+  return trimmed === "" ? fallback : trimmed;
+}
+
 export function resolvePaymentStatus(total: number, paid: number): PaymentStatus {
   if (paid <= 0) {
     return "غير واصل";
@@ -54,20 +63,25 @@ export function buildInvoiceShareText(booking: Booking) {
     `العميل: ${booking.customer_name}`,
     `الهاتف: ${booking.phone}`,
     `تاريخ الحجز: ${formatDate(booking.booking_date)}`,
-    `نوع الجلسة: ${booking.service_type}`,
-    `موقع الجلسة: ${booking.location_type}`,
-    `الكادر: ${booking.staff_gender}`,
+    `نوع الجلسة: ${formatOptionalText(booking.service_type)}`,
+    `تفاصيل الجلسة: ${formatOptionalText(booking.session_size)}`,
+    `موقع الجلسة: ${formatOptionalText(booking.location_type)}`,
+    `الكادر: ${formatOptionalText(booking.staff_gender)}`,
     `إجمالي الحساب: ${formatCurrency(booking.total_amount)}`,
     `المبلغ الواصل: ${formatCurrency(booking.paid_amount)}`,
     `المتبقي: ${formatCurrency(booking.remaining_amount)}`,
-    `حالة الدفع: ${booking.payment_status}`,
+    `حالة الدفع: ${formatOptionalText(booking.payment_status)}`,
     booking.notes ? `ملاحظات: ${booking.notes}` : null,
   ]
     .filter(Boolean)
     .join("\n");
 }
 
-export function getPaymentStatusTone(status: PaymentStatus) {
+export function getPaymentStatusTone(status: PaymentStatus | null) {
+  if (!status) {
+    return "info";
+  }
+
   switch (status) {
     case "واصل":
       return "success";

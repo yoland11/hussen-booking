@@ -17,6 +17,7 @@ import {
   formatCurrency,
   formatDate,
   formatDateTime,
+  formatOptionalText,
   getPaymentStatusTone,
   resolvePaymentStatus,
 } from "@/lib/format";
@@ -35,19 +36,24 @@ type FeedbackState = {
 
 type FormState = BookingFormState;
 
+const SERVICE_TYPE_OPTIONS = ["عيد ميلاد", "زفاف", "جلسة"] as const;
+const SESSION_SIZE_OPTIONS = ["٤٠ / ٣٠", "٦٠ / ٣٠"] as const;
+const LOCATION_TYPE_OPTIONS = ["داخلي", "خارجي", "قاعة"] as const;
+const STAFF_GENDER_OPTIONS = ["نسائي", "رجالي"] as const;
+
 function toFormState(booking: Booking): FormState {
   return {
     customer_name: booking.customer_name,
     phone: booking.phone,
     booking_date: booking.booking_date,
-    service_type: booking.service_type,
-    session_size: booking.session_size,
-    location_type: booking.location_type,
-    staff_gender: booking.staff_gender,
+    service_type: booking.service_type ?? "",
+    session_size: booking.session_size ?? "",
+    location_type: booking.location_type ?? "",
+    staff_gender: booking.staff_gender ?? "",
     extra_details: booking.extra_details ?? "",
     total_amount: String(booking.total_amount),
     paid_amount: String(booking.paid_amount),
-    payment_status: booking.payment_status,
+    payment_status: booking.payment_status ?? "",
     notes: booking.notes ?? "",
   };
 }
@@ -94,6 +100,42 @@ function getStats(bookings: Booking[]) {
   };
 }
 
+type ChoiceGroupProps<T extends string> = {
+  value: T | "";
+  options: readonly T[];
+  onChange: (value: T | "") => void;
+  variant?: "button" | "card";
+};
+
+function ChoiceGroup<T extends string>({
+  value,
+  options,
+  onChange,
+  variant = "button",
+}: ChoiceGroupProps<T>) {
+  return (
+    <div
+      className={`${styles.choiceGroup} ${
+        variant === "card" ? styles.choiceGroupCards : styles.choiceGroupButtons
+      }`}
+    >
+      {options.map((option) => (
+        <button
+          key={option}
+          type="button"
+          className={`${styles.choiceButton} ${
+            variant === "card" ? styles.choiceCard : styles.choiceButtonPill
+          } ${value === option ? styles.choiceButtonActive : ""}`}
+          aria-pressed={value === option}
+          onClick={() => onChange(value === option ? "" : option)}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function DashboardClient({ initialBookings }: DashboardClientProps) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
@@ -111,10 +153,19 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
   const visibleBookings = filterBookings(bookings, query, activeFilter);
   const stats = getStats(bookings);
 
-  const remainingPreview = Math.max(
-    Number(form.total_amount || 0) - Number(form.paid_amount || 0),
-    0,
-  );
+  const totalAmountValue = form.total_amount === "" ? null : Number(form.total_amount);
+  const paidAmountValue = form.paid_amount === "" ? null : Number(form.paid_amount);
+  const remainingPreview =
+    totalAmountValue === null && paidAmountValue === null
+      ? null
+      : Math.max((totalAmountValue ?? 0) - (paidAmountValue ?? 0), 0);
+  const automaticPaymentStatus =
+    totalAmountValue === null && paidAmountValue === null
+      ? null
+      : resolvePaymentStatus(totalAmountValue ?? 0, paidAmountValue ?? 0);
+  const automaticPaymentTone = automaticPaymentStatus
+    ? getPaymentStatusTone(automaticPaymentStatus)
+    : "info";
 
   function updateFormField(name: keyof FormState, value: string) {
     setForm((current) => {
@@ -146,18 +197,34 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
     event.preventDefault();
     setFeedback(null);
 
+    if (!form.customer_name.trim() || !form.phone.trim() || !form.booking_date) {
+      setFeedback({
+        tone: "error",
+        message: "يرجى إدخال اسم العميل ورقم الهاتف وتاريخ الحجز قبل الحفظ.",
+      });
+      return;
+    }
+
     const payload: BookingPayload = {
       customer_name: form.customer_name.trim(),
       phone: form.phone.trim(),
       booking_date: form.booking_date,
-      service_type: form.service_type as BookingPayload["service_type"],
-      session_size: form.session_size.trim(),
-      location_type: form.location_type as BookingPayload["location_type"],
-      staff_gender: form.staff_gender as BookingPayload["staff_gender"],
+      service_type: form.service_type
+        ? (form.service_type as BookingPayload["service_type"])
+        : null,
+      session_size: form.session_size.trim() || null,
+      location_type: form.location_type
+        ? (form.location_type as BookingPayload["location_type"])
+        : null,
+      staff_gender: form.staff_gender
+        ? (form.staff_gender as BookingPayload["staff_gender"])
+        : null,
       extra_details: form.extra_details.trim() || null,
       total_amount: Number(form.total_amount || 0),
       paid_amount: Number(form.paid_amount || 0),
-      payment_status: form.payment_status as BookingPayload["payment_status"],
+      payment_status: automaticPaymentStatus
+        ? (automaticPaymentStatus as BookingPayload["payment_status"])
+        : null,
       notes: form.notes.trim() || null,
     };
 
@@ -309,6 +376,7 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
                   value={form.customer_name}
                   onChange={(event) => updateFormField("customer_name", event.target.value)}
                   placeholder="الاسم الكامل"
+                  required
                 />
               </label>
 
@@ -319,6 +387,7 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
                   value={form.phone}
                   onChange={(event) => updateFormField("phone", event.target.value)}
                   placeholder="07XX XXX XXXX"
+                  required
                 />
               </label>
             </div>
@@ -329,6 +398,7 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
                 type="date"
                 value={form.booking_date}
                 onChange={(event) => updateFormField("booking_date", event.target.value)}
+                required
               />
             </label>
           </div>
@@ -337,72 +407,61 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
             <h3>نوع الجلسة</h3>
             <div className={styles.gridTwo}>
               <label className={styles.field}>
-                <span>نوع الجلسة</span>
-                <select
+                <span>التفاصيل</span>
+                <ChoiceGroup
                   value={form.service_type}
-                  onChange={(event) => updateFormField("service_type", event.target.value)}
-                >
-                  <option value="عيد ميلاد">عيد ميلاد</option>
-                  <option value="زفاف">زفاف</option>
-                  <option value="جلسة">جلسة</option>
-                </select>
+                  options={SERVICE_TYPE_OPTIONS}
+                  variant="card"
+                  onChange={(value) => updateFormField("service_type", value)}
+                />
               </label>
 
               <label className={styles.field}>
                 <span>تفاصيل الجلسة</span>
-                <select
+                <ChoiceGroup
                   value={form.session_size}
-                  onChange={(event) => updateFormField("session_size", event.target.value)}
-                >
-                  <option value="٣٠ / ٤٠">٣٠ / ٤٠</option>
-                  <option value="٣٠ / ٦٠">٣٠ / ٦٠</option>
-                  <option value="مخصص">مخصص</option>
-                </select>
+                  options={SESSION_SIZE_OPTIONS}
+                  onChange={(value) => updateFormField("session_size", value)}
+                />
               </label>
             </div>
 
             <label className={styles.field}>
-              <span>تفاصيل إضافية</span>
-              <textarea
-                rows={3}
+              <span>تفاصيل أخرى</span>
+              <input
                 value={form.extra_details}
                 onChange={(event) => updateFormField("extra_details", event.target.value)}
-                placeholder="تفاصيل إضافية عن الجلسة أو المقاس أو المتطلبات الخاصة"
+                placeholder="أضف تفاصيل ثانية إذا لزم الأمر"
               />
             </label>
           </div>
 
           <div className={styles.sectionCard}>
-            <h3>موقع الجلسة والكادر</h3>
+            <h3>موقع الجلسة</h3>
             <div className={styles.gridTwo}>
               <label className={styles.field}>
                 <span>موقع الجلسة</span>
-                <select
+                <ChoiceGroup
                   value={form.location_type}
-                  onChange={(event) => updateFormField("location_type", event.target.value)}
-                >
-                  <option value="داخلي">داخلي</option>
-                  <option value="خارجي">خارجي</option>
-                  <option value="قاعة">قاعة</option>
-                </select>
+                  options={LOCATION_TYPE_OPTIONS}
+                  onChange={(value) => updateFormField("location_type", value)}
+                />
               </label>
 
               <label className={styles.field}>
                 <span>الكادر</span>
-                <select
+                <ChoiceGroup
                   value={form.staff_gender}
-                  onChange={(event) => updateFormField("staff_gender", event.target.value)}
-                >
-                  <option value="نسائي">نسائي</option>
-                  <option value="رجالي">رجالي</option>
-                </select>
+                  options={STAFF_GENDER_OPTIONS}
+                  onChange={(value) => updateFormField("staff_gender", value)}
+                />
               </label>
             </div>
           </div>
 
           <div className={styles.sectionCard}>
             <h3>الحساب</h3>
-            <div className={styles.gridThree}>
+            <div className={styles.gridTwo}>
               <label className={styles.field}>
                 <span>إجمالي الحساب</span>
                 <input
@@ -422,24 +481,35 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
                   onChange={(event) => updateFormField("paid_amount", event.target.value)}
                 />
               </label>
+            </div>
 
-              <div className={styles.remainingCard}>
+            <div className={styles.accountSummaryGrid}>
+              <div className={styles.summaryCard}>
+                <span>الإجمالي</span>
+                <strong className={totalAmountValue === null ? styles.summaryValuePlaceholder : ""}>
+                  {totalAmountValue === null ? "—" : formatCurrency(totalAmountValue)}
+                </strong>
+              </div>
+
+              <div className={styles.summaryCard}>
+                <span>الواصل</span>
+                <strong className={paidAmountValue === null ? styles.summaryValuePlaceholder : ""}>
+                  {paidAmountValue === null ? "—" : formatCurrency(paidAmountValue)}
+                </strong>
+              </div>
+
+              <div className={styles.summaryCard}>
                 <span>المتبقي</span>
-                <strong>{formatCurrency(remainingPreview)}</strong>
+                <strong className={remainingPreview === null ? styles.summaryValuePlaceholder : ""}>
+                  {remainingPreview === null ? "—" : formatCurrency(remainingPreview)}
+                </strong>
               </div>
             </div>
 
-            <label className={styles.field}>
-              <span>حالة الدفع</span>
-              <select
-                value={form.payment_status}
-                onChange={(event) => updateFormField("payment_status", event.target.value)}
-              >
-                <option value="واصل">واصل</option>
-                <option value="غير واصل">غير واصل</option>
-                <option value="جزئي">جزئي</option>
-              </select>
-            </label>
+            <div className={`${styles.autoStatusCard} ${styles[automaticPaymentTone]}`}>
+              <span>حالة الدفع التلقائية</span>
+              <strong>{automaticPaymentStatus ?? "تظهر بعد إدخال المبالغ"}</strong>
+            </div>
           </div>
 
           <div className={styles.sectionCard}>
@@ -488,16 +558,20 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
             />
           </label>
 
-          <label className={styles.field}>
+          <div className={styles.field}>
             <span>فلترة التاريخ</span>
-            <select value={activeFilter} onChange={(event) => setActiveFilter(event.target.value as BookingFilter)}>
+            <select
+              className={styles.filterSelect}
+              value={activeFilter}
+              onChange={(event) => setActiveFilter(event.target.value as BookingFilter)}
+            >
               {FILTER_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
           <button type="button" className={styles.ghostButton} onClick={() => {
             setQuery("");
@@ -530,15 +604,22 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
                       </p>
                     </div>
 
-                    <span className={`${styles.statusBadge} ${styles[tone]}`}>{booking.payment_status}</span>
+                    <span className={`${styles.statusBadge} ${styles[tone]}`}>
+                      {formatOptionalText(booking.payment_status)}
+                    </span>
                   </div>
 
-                  <div className={styles.tags}>
-                    <span>{booking.service_type}</span>
-                    <span>{booking.session_size}</span>
-                    <span>{booking.location_type}</span>
-                    <span>{booking.staff_gender}</span>
-                  </div>
+                  {[booking.service_type, booking.session_size, booking.location_type, booking.staff_gender].some(
+                    Boolean,
+                  ) ? (
+                    <div className={styles.tags}>
+                      {[booking.service_type, booking.session_size, booking.location_type, booking.staff_gender]
+                        .filter((value): value is string => Boolean(value && value.trim()))
+                        .map((value) => (
+                          <span key={`${booking.id}-${value}`}>{value}</span>
+                        ))}
+                    </div>
+                  ) : null}
 
                   {booking.extra_details ? (
                     <p className={styles.detailsText}>{booking.extra_details}</p>

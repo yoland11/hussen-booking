@@ -17,6 +17,42 @@ const optionalString = (max: number, message: string) =>
     z.string().max(max, message),
   );
 
+const nullableString = (max: number, message: string) =>
+  z.preprocess(
+    (value) => {
+      if (value === null || value === undefined) return null;
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        return trimmed === "" ? null : trimmed;
+      }
+      return value;
+    },
+    z.string().max(max, message).nullable(),
+  );
+
+const nullableEnum = <T extends readonly [string, ...string[]]>(values: T) =>
+  z.preprocess(
+    (value) => {
+      if (value === null || value === undefined) return null;
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        return trimmed === "" ? null : trimmed;
+      }
+      return value;
+    },
+    z.enum(values).nullable(),
+  );
+
+const optionalAmount = () =>
+  z.preprocess(
+    (value) => {
+      if (value === null || value === undefined || value === "") return 0;
+      if (typeof value === "string") return Number(value);
+      return value;
+    },
+    z.number().finite().nonnegative(),
+  );
+
 export const loginSchema = z.object({
   pin: z
     .string()
@@ -34,25 +70,21 @@ export const bookingPayloadSchema = z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "تاريخ الحجز غير صالح."),
 
-    service_type: z.enum(SERVICE_TYPES),
+    service_type: nullableEnum(SERVICE_TYPES),
 
-    session_size: z
-      .string()
-      .trim()
-      .min(1, "تفاصيل الجلسة مطلوبة.")
-      .max(80),
+    session_size: nullableString(80, "تفاصيل الجلسة طويلة جداً."),
 
-    location_type: z.enum(LOCATION_TYPES),
+    location_type: nullableEnum(LOCATION_TYPES),
 
-    staff_gender: z.enum(STAFF_GENDERS),
+    staff_gender: nullableEnum(STAFF_GENDERS),
 
     extra_details: optionalString(600, "تفاصيل الجلسة طويلة جداً."),
 
-    total_amount: z.number().finite().nonnegative(),
+    total_amount: optionalAmount(),
 
-    paid_amount: z.number().finite().nonnegative(),
+    paid_amount: optionalAmount(),
 
-    payment_status: z.enum(PAYMENT_STATUSES),
+    payment_status: nullableEnum(PAYMENT_STATUSES),
 
     notes: optionalString(1200, "الملاحظات طويلة جداً."),
   })

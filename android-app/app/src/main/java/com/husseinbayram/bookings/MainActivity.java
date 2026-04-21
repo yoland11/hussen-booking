@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
         animateLoop(splashRingInner, "rotation", 0f, -10f, 4_400L);
         animateLoop(logoPlate, "translationY", -10f, 10f, 3_600L);
 
-        ObjectAnimator shineAnimator = ObjectAnimator.ofFloat(logoShine, View.TRANSLATION_X, -520f, 520f);
+        ObjectAnimator shineAnimator = ObjectAnimator.ofFloat(logoShine, View.TRANSLATION_X, -320f, 320f);
         shineAnimator.setDuration(2_100L);
         shineAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         shineAnimator.setRepeatCount(ValueAnimator.INFINITE);

@@ -15,19 +15,46 @@ create table if not exists public.bookings (
   customer_name text not null check (char_length(trim(customer_name)) >= 2),
   phone text not null check (char_length(trim(phone)) >= 7),
   booking_date date not null,
-  service_type text not null check (service_type in ('عيد ميلاد', 'زفاف', 'جلسة')),
-  session_size text not null,
-  location_type text not null check (location_type in ('داخلي', 'خارجي', 'قاعة')),
-  staff_gender text not null check (staff_gender in ('نسائي', 'رجالي')),
+  service_type text check (service_type is null or service_type in ('عيد ميلاد', 'زفاف', 'جلسة')),
+  session_size text,
+  location_type text check (location_type is null or location_type in ('داخلي', 'خارجي', 'قاعة')),
+  staff_gender text check (staff_gender is null or staff_gender in ('نسائي', 'رجالي')),
   extra_details text,
   total_amount numeric(12, 2) not null default 0 check (total_amount >= 0),
   paid_amount numeric(12, 2) not null default 0 check (paid_amount >= 0 and paid_amount <= total_amount),
   remaining_amount numeric(12, 2) generated always as (greatest(total_amount - paid_amount, 0)) stored,
-  payment_status text not null check (payment_status in ('واصل', 'غير واصل', 'جزئي')),
+  payment_status text check (payment_status is null or payment_status in ('واصل', 'غير واصل', 'جزئي')),
   notes text,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.bookings alter column service_type drop not null;
+alter table public.bookings alter column session_size drop not null;
+alter table public.bookings alter column location_type drop not null;
+alter table public.bookings alter column staff_gender drop not null;
+alter table public.bookings alter column payment_status drop not null;
+
+alter table public.bookings drop constraint if exists bookings_service_type_check;
+alter table public.bookings drop constraint if exists bookings_location_type_check;
+alter table public.bookings drop constraint if exists bookings_staff_gender_check;
+alter table public.bookings drop constraint if exists bookings_payment_status_check;
+
+alter table public.bookings
+  add constraint bookings_service_type_check
+  check (service_type is null or service_type in ('عيد ميلاد', 'زفاف', 'جلسة'));
+
+alter table public.bookings
+  add constraint bookings_location_type_check
+  check (location_type is null or location_type in ('داخلي', 'خارجي', 'قاعة'));
+
+alter table public.bookings
+  add constraint bookings_staff_gender_check
+  check (staff_gender is null or staff_gender in ('نسائي', 'رجالي'));
+
+alter table public.bookings
+  add constraint bookings_payment_status_check
+  check (payment_status is null or payment_status in ('واصل', 'غير واصل', 'جزئي'));
 
 create table if not exists public.admin_login_rate_limits (
   identifier text primary key,

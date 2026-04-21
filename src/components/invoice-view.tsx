@@ -4,7 +4,7 @@ import { CopyrightFooter } from "@/components/copyright-footer";
 import { InvoicePrintShell } from "@/components/invoice-print-shell";
 import { InvoiceToolbar } from "@/components/invoice-toolbar";
 import { BRAND_NAME } from "@/lib/constants";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDate, formatOptionalText } from "@/lib/format";
 import type { Booking } from "@/types/booking";
 
 import styles from "./invoice-view.module.css";
@@ -64,19 +64,19 @@ export function InvoiceView({ booking, autoPrint = false }: InvoiceViewProps) {
               <ul className={styles.detailList}>
                 <li>
                   <span>نوع الجلسة</span>
-                  <strong>{booking.service_type}</strong>
+                  <strong>{formatOptionalText(booking.service_type)}</strong>
                 </li>
                 <li>
                   <span>تفاصيل الجلسة</span>
-                  <strong>{booking.session_size}</strong>
+                  <strong>{formatOptionalText(booking.session_size)}</strong>
                 </li>
                 <li>
                   <span>موقع الجلسة</span>
-                  <strong>{booking.location_type}</strong>
+                  <strong>{formatOptionalText(booking.location_type)}</strong>
                 </li>
                 <li>
                   <span>الكادر</span>
-                  <strong>{booking.staff_gender}</strong>
+                  <strong>{formatOptionalText(booking.staff_gender)}</strong>
                 </li>
               </ul>
 
@@ -95,7 +95,7 @@ export function InvoiceView({ booking, autoPrint = false }: InvoiceViewProps) {
                 </div>
                 <div>
                   <span>حالة الدفع</span>
-                  <strong>{booking.payment_status}</strong>
+                  <strong>{formatOptionalText(booking.payment_status)}</strong>
                 </div>
               </div>
             </article>
