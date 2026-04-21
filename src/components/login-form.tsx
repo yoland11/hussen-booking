@@ -29,7 +29,9 @@ export function LoginForm() {
         body: JSON.stringify({ pin }),
       });
 
-      const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+      const payload = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
 
       if (!response.ok) {
         setIsError(true);
@@ -48,8 +50,9 @@ export function LoginForm() {
     <main className={styles.page}>
       <div className={styles.card}>
         <section className={styles.hero}>
-          <span className={styles.eyebrow}>دخول الإدارة</span>
+          <span className={styles.eyebrow}>بوابة الإدارة</span>
           <h1 className={styles.brandTitle}>{BRAND_NAME}</h1>
+          <p className={styles.brandSubtitle}>{BRAND_SUBTITLE}</p>
 
           <div className={styles.logoFrame}>
             <Image
@@ -61,47 +64,37 @@ export function LoginForm() {
               priority
             />
           </div>
-
-          <p className={styles.brandSubtitle}>{BRAND_SUBTITLE}</p>
         </section>
 
         <section className={styles.formShell}>
           <div className={styles.sectionHead}>
-            <div>
-              <h2>تسجيل الدخول إلى لوحة الإدارة</h2>
-              <p>أدخل رمز الـ PIN الخاص بالإدارة لمتابعة إدارة الحجوزات والفواتير.</p>
-            </div>
+            <h2>تسجيل دخول الإدارة</h2>
           </div>
 
-          {feedback ? (
+          {feedback && (
             <div className={`${styles.notice} ${isError ? styles.error : styles.success}`}>
               {feedback}
             </div>
-          ) : null}
+          )}
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <label className={styles.field}>
               <span>رمز PIN</span>
               <input
                 type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete="off"
-                placeholder="أدخل رمز الإدارة"
                 value={pin}
-                onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 8))}
+                onChange={(e) =>
+                  setPin(e.target.value.replace(/\D/g, "").slice(0, 8))
+                }
+                placeholder="أدخل رمز الإدارة"
                 disabled={isPending}
-                suppressHydrationWarning
               />
             </label>
 
-            <button type="submit" className={styles.primaryButton} disabled={isPending}>
+            <button className={styles.primaryButton} disabled={isPending}>
               {isPending ? "جارٍ التحقق..." : "دخول لوحة الحجوزات"}
             </button>
           </form>
-
-          <p className={styles.helper}>
-          </p>
         </section>
 
         <CopyrightFooter />

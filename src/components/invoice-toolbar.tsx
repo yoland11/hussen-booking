@@ -18,7 +18,14 @@ export function InvoiceToolbar({ booking, autoPrint = false }: InvoiceToolbarPro
 
   useEffect(() => {
     if (autoPrint) {
-      const timer = window.setTimeout(() => window.print(), 350);
+      const timer = window.setTimeout(() => {
+        if (window.NativeBridge?.printCurrentPage) {
+          window.NativeBridge.printCurrentPage();
+          return;
+        }
+
+        window.print();
+      }, 350);
       return () => window.clearTimeout(timer);
     }
 
@@ -36,6 +43,11 @@ export function InvoiceToolbar({ booking, autoPrint = false }: InvoiceToolbarPro
       return;
     }
 
+    if (window.NativeBridge?.shareText) {
+      window.NativeBridge.shareText("فاتورة حسين بيرام", text);
+      return;
+    }
+
     await navigator.clipboard.writeText(text);
     setFeedback("تم نسخ نص الفاتورة إلى الحافظة.");
     window.setTimeout(() => setFeedback(null), 2800);
@@ -47,7 +59,18 @@ export function InvoiceToolbar({ booking, autoPrint = false }: InvoiceToolbarPro
         <Link href="/dashboard" className={styles.toolbarButton}>
           العودة للوحة
         </Link>
-        <button type="button" className={styles.toolbarButton} onClick={() => window.print()}>
+        <button
+          type="button"
+          className={styles.toolbarButton}
+          onClick={() => {
+            if (window.NativeBridge?.printCurrentPage) {
+              window.NativeBridge.printCurrentPage();
+              return;
+            }
+
+            window.print();
+          }}
+        >
           طباعة PDF
         </button>
         <button type="button" className={styles.toolbarButton} onClick={handleShare}>

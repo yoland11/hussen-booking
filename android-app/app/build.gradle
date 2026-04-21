@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.application'
+}
+
+def configuredWebUrl = project.findProperty("BOOKINGS_WEB_URL") ?: System.getenv("BOOKINGS_WEB_URL") ?: "https://your-vercel-domain.vercel.app"
+def escapedWebUrl = configuredWebUrl.toString().replace("\\", "\\\\").replace("\"", "\\\"")
+
+configurations.configureEach {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
+
+android {
+    namespace 'com.husseinbayram.bookings'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.husseinbayram.bookings'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+        buildConfigField "String", "WEB_APP_URL", "\"${escapedWebUrl}\""
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles(
+                getDefaultProguardFile('proguard-android-optimize.txt'),
+                'proguard-rules.pro'
+            )
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.webkit:webkit:1.12.1'
+}

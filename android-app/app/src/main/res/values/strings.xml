@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">حجوزات حسين بيرام</string>
+    <string name="brand_name">حسين بيرام</string>
+    <string name="brand_subtitle">نظام حجوزات الجلسات التصويرية</string>
+    <string name="error_title">تعذر فتح النظام</string>
+    <string name="error_message">تحقق من اتصال الإنترنت أو رابط الموقع المرتبط بالتطبيق ثم أعد المحاولة.</string>
+    <string name="retry_action">إعادة المحاولة</string>
+    <string name="share_invoice">مشاركة الفاتورة</string>
+    <string name="invoice_print_job">فاتورة حسين بيرام</string>
+</resources>
