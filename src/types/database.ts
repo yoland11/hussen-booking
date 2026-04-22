@@ -26,6 +26,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      notification_deliveries: {
+        Row: {
+          booking_id: string;
+          channel: "web_push";
+          created_at: string;
+          id: string;
+          push_subscription_id: string;
+          reminder_kind: "today" | "tomorrow";
+        };
+        Insert: {
+          booking_id: string;
+          channel?: "web_push";
+          created_at?: string;
+          id?: string;
+          push_subscription_id: string;
+          reminder_kind: "today" | "tomorrow";
+        };
+        Update: {
+          booking_id?: string;
+          channel?: "web_push";
+          created_at?: string;
+          id?: string;
+          push_subscription_id?: string;
+          reminder_kind?: "today" | "tomorrow";
+        };
+        Relationships: [];
+      };
       bookings: {
         Row: {
           booking_date: string;
@@ -78,6 +105,36 @@ export type Database = {
           staff_gender?: StaffGender | null;
           total_amount?: number;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          auth: string;
+          created_at: string;
+          endpoint: string;
+          id: string;
+          p256dh: string;
+          updated_at: string;
+          user_agent: string | null;
+        };
+        Insert: {
+          auth: string;
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          p256dh: string;
+          updated_at?: string;
+          user_agent?: string | null;
+        };
+        Update: {
+          auth?: string;
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          p256dh?: string;
+          updated_at?: string;
+          user_agent?: string | null;
         };
         Relationships: [];
       };

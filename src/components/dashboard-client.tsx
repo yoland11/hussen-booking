@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { BrandHeader } from "@/components/brand-header";
 import { CopyrightFooter } from "@/components/copyright-footer";
+import { NotificationPreferences } from "@/components/notification-preferences";
 import {
   EMPTY_BOOKING_FORM,
   FILTER_OPTIONS,
@@ -348,6 +349,8 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
           ))}
         </section>
       ) : null}
+
+      <NotificationPreferences bookings={bookings} />
 
       {feedback ? (
         <div className={`${styles.notice} ${styles[feedback.tone]}`}>{feedback.message}</div>

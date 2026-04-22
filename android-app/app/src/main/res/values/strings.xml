@@ -8,4 +8,12 @@
     <string name="retry_action">إعادة المحاولة</string>
     <string name="share_invoice">مشاركة الفاتورة</string>
     <string name="invoice_print_job">فاتورة حسين بيرام</string>
+    <string name="notification_channel_name">تذكيرات الحجوزات</string>
+    <string name="notification_channel_description">إشعارات جلسات اليوم والجلسات القريبة</string>
+    <string name="notification_title_today">موعد جلسة اليوم</string>
+    <string name="notification_title_tomorrow">تذكير بجلسة قريبة</string>
+    <string name="notification_lead_today">لديك جلسة اليوم</string>
+    <string name="notification_lead_tomorrow">تذكير بجلسة الغد</string>
+    <string name="notification_default_session">جلسة تصوير</string>
+    <string name="notification_time_unknown">الوقت غير محدد</string>
 </resources>

@@ -13,6 +13,10 @@
 - فلترة: اليوم، القادمة، هذا الشهر
 - إحصاءات فورية: عدد الحجوزات، حجوزات اليوم، الواصل، المتبقي
 - فاتورة عربية أنيقة مع معاينة وطباعة PDF من المتصفح ومشاركة نصية
+- إشعارات حقيقية للحجوزات:
+  - Web Push للمتصفح والـ PWA عبر `Service Worker`
+  - إشعارات محلية مجدولة داخل تطبيق Android
+  - تذكير لجلسات اليوم والغد مع فتح لوحة الحجوزات عند الضغط على الإشعار
 - تصميم فاخر RTL مع الهوية البصرية الحالية والشعارين
 
 ## التقنيات
@@ -22,6 +26,7 @@
 - `Supabase PostgreSQL`
 - `Tailwind/PostCSS` موجودان من القالب، لكن الواجهة مبنية فعليًا بـ CSS Modules + Global CSS
 - `bcryptjs` لتخزين ومطابقة الـ PIN بشكل آمن
+- `web-push` لإرسال إشعارات Web Push من الخادم
 - `zod` للتحقق من صحة البيانات
 
 ## بنية المشروع
@@ -52,6 +57,8 @@ scripts/hash-pin.mjs     # توليد hash جديد للـ PIN
 
 - جدول `bookings`
 - جدول `admin_login_rate_limits`
+- جدول `push_subscriptions`
+- جدول `notification_deliveries`
 - الفهارس
 - trigger لتحديث `updated_at`
 - عمود `remaining_amount` محسوب تلقائيًا من:
@@ -67,7 +74,23 @@ SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 ADMIN_PIN_HASH=$2b$12$replace_this_with_bcrypt_hash
 SESSION_SECRET=replace-with-a-long-random-secret-at-least-32-characters
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your-web-push-public-key
+WEB_PUSH_VAPID_PRIVATE_KEY=your-web-push-private-key
+WEB_PUSH_VAPID_SUBJECT=mailto:you@example.com
+CRON_SECRET=replace-with-a-long-random-secret-for-vercel-cron
 ```
+
+لتوليد مفاتيح Web Push:
+
+```bash
+npm install
+npm run generate-vapid
+```
+
+ضع الناتج داخل:
+
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+- `WEB_PUSH_VAPID_PRIVATE_KEY`
 
 ## 3. أين تضع الـ PIN بشكل آمن؟
 
@@ -124,10 +147,21 @@ npm run dev
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_PIN_HASH`
    - `SESSION_SECRET`
+   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+   - `WEB_PUSH_VAPID_PRIVATE_KEY`
+   - `WEB_PUSH_VAPID_SUBJECT`
+   - `CRON_SECRET`
 
 4. نفّذ نشر المشروع.
 
 بعد النشر، ستعمل نفس مسارات الدخول واللوحة والفواتير مباشرة.
+
+إشعارات الحجوزات ستعمل عبر:
+
+- `Service Worker` في الويب
+- كرون Vercel من الملف `vercel.json`
+- زر تفعيل الإشعارات داخل لوحة الإدارة
+- إشعارات Android المحلية من داخل الـ APK
 
 ## 7. ملاحظات أمنية مهمة
 
@@ -138,6 +172,7 @@ npm run dev
 - الـ Service Role Key لا يذهب إلى المتصفح
 - `remaining_amount` محفوظ بشكل محسوب على مستوى قاعدة البيانات
 - المسارات الإدارية محمية في `middleware.ts`
+- اشتراكات Push تُحفظ في Supabase ويمنع سجل `notification_deliveries` تكرار نفس الإشعار لنفس الموعد
 
 ## 8. ملاحظات قاعدة البيانات
 
@@ -175,4 +210,5 @@ npm run lint
 npm run typecheck
 npm run build
 npm run hash-pin -- 1234
+npm run generate-vapid
 ```

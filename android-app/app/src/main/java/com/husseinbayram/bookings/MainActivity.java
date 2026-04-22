@@ -2,10 +2,12 @@ package com.husseinbayram.bookings;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -30,8 +32,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.ContextCompat;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,6 +45,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
     private static final long SPLASH_DURATION_MS = 3_000L;
     private static final long SPLASH_FADE_DURATION_MS = 520L;
+    private static final String EXTRA_OPEN_PATH = "open_path";
 
     private WebView webView;
     private View splashOverlay;
@@ -52,8 +58,17 @@ public class MainActivity extends AppCompatActivity {
     private View errorPanel;
     private TextView errorMessage;
     private String allowedHost;
+    private String pendingLaunchPath;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean splashDismissed;
+    private final ActivityResultLauncher<String> notificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                BookingNotificationScheduler.setNotificationsEnabled(this, isGranted);
+                if (isGranted) {
+                    BookingNotificationScheduler.rescheduleStored(this);
+                }
+                dispatchNotificationState(isGranted);
+            });
 
     private final Runnable dismissSplashRunnable = new Runnable() {
         @Override
@@ -83,7 +98,9 @@ public class MainActivity extends AppCompatActivity {
         retryButton.setOnClickListener(v -> reloadHome());
 
         allowedHost = parseHost(BuildConfig.WEB_APP_URL);
+        pendingLaunchPath = extractLaunchPath(getIntent());
 
+        BookingNotificationScheduler.ensureNotificationChannel(this);
         configureWebView();
         startSplashMotion();
 
@@ -228,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void reloadHome() {
         hideErrorState();
-        webView.loadUrl(BuildConfig.WEB_APP_URL);
+        webView.loadUrl(consumeLaunchUrl());
     }
 
     private void showErrorState(String message) {
@@ -291,6 +308,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        pendingLaunchPath = extractLaunchPath(intent);
+
+        if (webView != null) {
+            hideErrorState();
+            webView.loadUrl(consumeLaunchUrl());
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(dismissSplashRunnable);
@@ -326,5 +355,101 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        @JavascriptInterface
+        public boolean areNotificationsEnabled() {
+            return BookingNotificationScheduler.areNotificationsEnabled(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public void requestNotificationPermission() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    requestNotificationsPermissionInternal();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void syncBookingNotifications(final String bookingsJson) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    BookingNotificationScheduler.sync(MainActivity.this, bookingsJson);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void clearScheduledNotifications() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    BookingNotificationScheduler.disableAndClear(MainActivity.this);
+                    dispatchNotificationState(false);
+                }
+            });
+        }
+    }
+
+    private void requestNotificationsPermissionInternal() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            BookingNotificationScheduler.setNotificationsEnabled(this, true);
+            BookingNotificationScheduler.rescheduleStored(this);
+            dispatchNotificationState(true);
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            BookingNotificationScheduler.setNotificationsEnabled(this, true);
+            BookingNotificationScheduler.rescheduleStored(this);
+            dispatchNotificationState(true);
+            return;
+        }
+
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+    }
+
+    private void dispatchNotificationState(boolean enabled) {
+        if (webView == null) {
+            return;
+        }
+
+        String script = "window.dispatchEvent(new CustomEvent('hb-native-notifications-changed', "
+                + "{ detail: { enabled: " + (enabled ? "true" : "false") + " } }));";
+        webView.evaluateJavascript(script, null);
+    }
+
+    private String consumeLaunchUrl() {
+        String launchPath = pendingLaunchPath;
+        pendingLaunchPath = null;
+
+        if (launchPath == null || launchPath.trim().isEmpty()) {
+            return BuildConfig.WEB_APP_URL;
+        }
+
+        if (launchPath.startsWith("http://") || launchPath.startsWith("https://")) {
+            return launchPath;
+        }
+
+        String normalizedPath = launchPath.startsWith("/") ? launchPath : "/" + launchPath;
+        return BuildConfig.WEB_APP_URL + normalizedPath;
+    }
+
+    @Nullable
+    private String extractLaunchPath(@Nullable Intent intent) {
+        if (intent == null) {
+            return null;
+        }
+
+        String path = intent.getStringExtra(EXTRA_OPEN_PATH);
+        if (path != null && !path.trim().isEmpty()) {
+            return path.trim();
+        }
+
+        Uri data = intent.getData();
+        return data != null ? data.toString() : null;
     }
 }

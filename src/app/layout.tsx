@@ -18,6 +18,8 @@ const marhey = Marhey({
 export const metadata: Metadata = {
   title: `${BRAND_NAME} | ${BRAND_SUBTITLE}`,
   description: "نظام إدارة حجوزات وتصميم فواتير لجلسات التصوير باستضافة Next.js وSupabase.",
+  manifest: "/manifest.webmanifest",
+  applicationName: BRAND_NAME,
 };
 
 export default function RootLayout({

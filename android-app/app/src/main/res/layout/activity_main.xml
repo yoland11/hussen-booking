@@ -109,28 +109,28 @@
                 android:textStyle="bold" />
 
             <FrameLayout
-                android:layout_width="260dp"
-                android:layout_height="250dp"
+                android:layout_width="300dp"
+                android:layout_height="232dp"
                 android:layout_marginTop="20dp">
 
                 <View
                     android:id="@+id/splash_ring_outer"
-                    android:layout_width="226dp"
-                    android:layout_height="226dp"
+                    android:layout_width="244dp"
+                    android:layout_height="244dp"
                     android:layout_gravity="center"
                     android:background="@drawable/intro_ring" />
 
                 <View
                     android:id="@+id/splash_ring_inner"
-                    android:layout_width="186dp"
-                    android:layout_height="186dp"
+                    android:layout_width="206dp"
+                    android:layout_height="206dp"
                     android:layout_gravity="center"
                     android:background="@drawable/intro_ring_soft" />
 
                 <FrameLayout
                     android:id="@+id/logo_plate"
-                    android:layout_width="188dp"
-                    android:layout_height="188dp"
+                    android:layout_width="252dp"
+                    android:layout_height="124dp"
                     android:layout_gravity="center"
                     android:background="@drawable/intro_logo_plate"
                     android:clipToOutline="true"
@@ -140,10 +140,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:contentDescription="@string/app_name"
-                        android:paddingStart="18dp"
-                        android:paddingTop="18dp"
-                        android:paddingEnd="18dp"
-                        android:paddingBottom="18dp"
+                        android:paddingStart="22dp"
+                        android:paddingTop="20dp"
+                        android:paddingEnd="22dp"
+                        android:paddingBottom="20dp"
                         android:scaleType="fitCenter"
                         android:src="@drawable/hb_logo" />
 
